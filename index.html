@@ -5,348 +5,272 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#080d18">
-  <title>PCVANCE | Gestão de Ordens de Serviço</title>
+  <title>PCVANCE | Ordens de Serviço</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img src="logo-pcvance.png" alt="Logo PCVANCE" class="brand-logo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <div class="brand-symbol" style="display:none">PC</div>
+      <div><h2>PCVANCE</h2><small>GESTÃO TÉCNICA</small></div>
+    </div>
 
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="brand-symbol">PC</div>
-        <div>
-          <h2>PCVANCE</h2>
-          <small>GESTÃO TÉCNICA</small>
-        </div>
+    <div class="nav-label">PRINCIPAL</div>
+    <button class="nav-item active" data-page="dashboard">▦ &nbsp; Dashboard</button>
+    <button class="nav-item" data-page="nova">＋ &nbsp; Criar ordem de serviço</button>
+    <button class="nav-item" data-page="ordens">☷ &nbsp; Gerenciar OS</button>
+
+    <div class="nav-label">GESTÃO</div>
+    <button class="nav-item" data-page="relatorios">▤ &nbsp; Relatórios</button>
+    <button class="nav-item" data-page="configuracoes">⚙ &nbsp; Configurações</button>
+
+    <div class="sidebar-footer">
+      <span class="status-dot"></span>
+      <div><strong>PCVANCE</strong><small>Sistema de ordens de serviço</small></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+      <div><span class="breadcrumb">PCVANCE /</span> <strong id="pageTitle">Dashboard</strong></div>
+      <div class="topbar-right">
+        <span class="online-badge"><span></span> Sistema local</span>
+        <div class="avatar">PC</div>
       </div>
+    </header>
 
-      <div class="nav-label">MENU PRINCIPAL</div>
-      <button class="nav-item active" data-page="dashboard">▦ Dashboard</button>
-      <button class="nav-item" data-page="nova">＋ Criar ordem de serviço</button>
-      <button class="nav-item" data-page="ordens">▤ Gerenciar OS</button>
+    <div class="content">
 
-      <div class="nav-label">SISTEMA</div>
-      <button class="nav-item" data-page="relatorios">▥ Relatórios</button>
-      <button class="nav-item" data-page="configuracoes">⚙ Configurações</button>
-
-      <div class="sidebar-footer">
-        <div class="status-dot"></div>
-        <div>
-          <strong>Sistema PCVANCE</strong>
-          <small>Versão inicial · Local</small>
+      <!-- DASHBOARD -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">VISÃO GERAL</p>
+            <h1>Dashboard</h1>
+            <p class="muted">Acompanhe as ordens de serviço da PCVANCE.</p>
+          </div>
+          <button class="btn primary" data-go="nova">＋ Nova ordem de serviço</button>
         </div>
-      </div>
-    </aside>
 
-    <main class="main">
-      <header class="topbar">
-        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
-        <div>
-          <span class="breadcrumb">PCVANCE /</span>
-          <strong id="pageTitle">Dashboard</strong>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon blue">▤</div><span>Total de ordens</span><strong id="statTotal">0</strong><small>Ordens registradas neste navegador</small></div>
+          <div class="stat-card"><div class="stat-icon orange">◷</div><span>Em atendimento</span><strong id="statAndamento">0</strong><small>Ordens abertas ou em execução</small></div>
+          <div class="stat-card"><div class="stat-icon purple">◉</div><span>Aguardando aprovação</span><strong id="statAprovacao">0</strong><small>Orçamentos pendentes</small></div>
+          <div class="stat-card"><div class="stat-icon green">✓</div><span>Concluídas</span><strong id="statConcluidas">0</strong><small>Ordens finalizadas</small></div>
         </div>
-        <div class="topbar-right">
-          <span class="online-badge"><span></span> Sistema ativo</span>
-          <div class="avatar">PC</div>
+
+        <div class="panel">
+          <div class="panel-heading">
+            <div><h2>Ordens recentes</h2><p class="muted">Acompanhe os últimos atendimentos cadastrados.</p></div>
+            <button class="btn secondary small" data-go="ordens">Ver todas</button>
+          </div>
+          <div class="table-wrap hidden">
+            <table>
+              <thead><tr><th>Número</th><th>Cliente</th><th>Equipamento</th><th>Abertura</th><th>Status</th><th>Ação</th></tr></thead>
+              <tbody id="recentTable"></tbody>
+            </table>
+          </div>
+          <div id="recentEmpty" class="empty-state">
+            <div class="empty-icon">▤</div><strong>Nenhuma ordem cadastrada</strong>
+            <p>Crie sua primeira ordem de serviço para começar.</p>
+            <button class="btn primary" data-go="nova">Criar primeira OS</button>
+          </div>
         </div>
-      </header>
+      </section>
 
-      <div class="content">
+      <!-- CADASTRO / EDIÇÃO -->
+      <section class="page" id="page-nova">
+        <div class="page-heading">
+          <div><p class="eyebrow">ATENDIMENTO TÉCNICO</p><h1 id="formTitle">Criar ordem de serviço</h1><p class="muted">Preencha os dados para registrar o atendimento.</p></div>
+        </div>
 
-        <!-- DASHBOARD -->
-        <section class="page active" id="page-dashboard">
-          <div class="page-heading">
-            <div>
-              <p class="eyebrow">VISÃO GERAL</p>
-              <h1>Dashboard</h1>
-              <p class="muted">Acompanhe os atendimentos da PCVANCE.</p>
+        <form id="osForm">
+          <input type="hidden" id="editId">
+
+          <div class="form-meta">
+            <div><label for="osNumber">Número da OS</label><input id="osNumber" readonly></div>
+            <div><label for="dataAbertura">Data de abertura *</label><input id="dataAbertura" type="date" required></div>
+            <div><label for="dataPrevisao">Previsão de entrega</label><input id="dataPrevisao" type="date"></div>
+            <div><label for="tecnico">Técnico responsável *</label><input id="tecnico" required placeholder="Nome do técnico"></div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title"><span>01</span><div><h2>Dados do cliente</h2><p>Identificação e contato do proprietário do equipamento.</p></div></div>
+            <div class="form-grid">
+              <div class="field"><label for="cliente">Nome / Empresa *</label><input id="cliente" required placeholder="Nome completo ou empresa"></div>
+              <div class="field"><label for="documento">CPF / CNPJ</label><input id="documento" placeholder="Documento do cliente"></div>
+              <div class="field"><label for="telefone">Telefone *</label><input id="telefone" required type="tel" placeholder="(87) 99999-9999"></div>
+              <div class="field"><label for="email">E-mail</label><input id="email" type="email" placeholder="cliente@email.com"></div>
+              <div class="field"><label for="endereco">Endereço</label><input id="endereco" placeholder="Rua, número, bairro"></div>
+              <div class="field"><label for="cidade">Cidade / UF</label><input id="cidade" placeholder="Cidade - UF"></div>
             </div>
-            <button class="btn primary" data-go="nova">＋ Nova ordem de serviço</button>
           </div>
 
-          <div class="stats-grid">
-            <article class="stat-card">
-              <div class="stat-icon blue">▤</div>
-              <span>Total de OS</span>
-              <strong id="statTotal">0</strong>
-              <small>Ordens cadastradas</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-icon orange">◷</div>
-              <span>Em andamento</span>
-              <strong id="statAndamento">0</strong>
-              <small>Em execução</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-icon purple">✓</div>
-              <span>Aguardando aprovação</span>
-              <strong id="statAprovacao">0</strong>
-              <small>Orçamentos pendentes</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-icon green">✔</div>
-              <span>Concluídas</span>
-              <strong id="statConcluidas">0</strong>
-              <small>Serviços finalizados</small>
-            </article>
-          </div>
-
-          <div class="panel">
-            <div class="panel-heading">
-              <div>
-                <h2>Ordens recentes</h2>
-                <p class="muted">Últimos atendimentos cadastrados.</p>
+          <div class="form-section">
+            <div class="section-title"><span>02</span><div><h2>Identificação do equipamento</h2><p>Registre o equipamento recebido e suas condições.</p></div></div>
+            <div class="form-grid">
+              <div class="field"><label for="tipoEquipamento">Tipo de equipamento *</label>
+                <select id="tipoEquipamento" required>
+                  <option value="">Selecione</option><option>Desktop</option><option>Notebook</option><option>All-in-One</option><option>Impressora</option><option>Monitor</option><option>Periférico</option><option>Rede / Roteador</option><option>Outro</option>
+                </select>
               </div>
-              <button class="btn secondary small" data-go="ordens">Ver todas</button>
+              <div class="field"><label for="marca">Marca / Modelo</label><input id="marca" placeholder="Ex.: Dell Inspiron"></div>
+              <div class="field"><label for="serie">Número de série</label><input id="serie" placeholder="Número de série ou identificação"></div>
+              <div class="field"><label for="acessorios">Acessórios recebidos</label><input id="acessorios" placeholder="Ex.: carregador, cabo, mouse"></div>
+              <div class="field"><label for="senha">Senha do equipamento (opcional)</label><input id="senha" type="password" autocomplete="new-password" placeholder="Evite registrar senhas pessoais"></div>
+              <div class="field"><label for="estadoFisico">Estado físico na entrada</label><input id="estadoFisico" placeholder="Ex.: sem avarias, tela trincada"></div>
             </div>
+            <p class="notice">Privacidade: prefira não registrar senhas pessoais nesta OS. Se uma credencial for indispensável para o serviço, combine com o cliente uma forma segura de acesso e não a inclua no PDF.</p>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title"><span>03</span><div><h2>Problema relatado pelo cliente</h2><p>Descreva o defeito informado e as condições de entrada.</p></div></div>
+            <div class="form-grid">
+              <div class="field"><label for="problema">Defeito / solicitação *</label><textarea id="problema" rows="4" required placeholder="Descreva o problema informado pelo cliente..."></textarea></div>
+              <div class="field"><label for="avarias">Avarias e observações de entrada</label><textarea id="avarias" rows="4" placeholder="Danos visíveis, sinais de queda, estado dos acessórios..."></textarea></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title"><span>04</span><div><h2>Serviços, peças e orçamento</h2><p>Adicione os itens e seus respectivos valores.</p></div></div>
             <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nº OS</th>
-                    <th>Cliente</th>
-                    <th>Equipamento</th>
-                    <th>Data</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody id="recentTable"></tbody>
+              <table class="items-table">
+                <thead><tr><th>Serviço / peça</th><th>Qtd.</th><th>Valor unitário (R$)</th><th>Subtotal</th><th></th></tr></thead>
+                <tbody id="itemsBody"></tbody>
               </table>
             </div>
-            <div class="empty-state" id="recentEmpty">
-              <div class="empty-icon">▤</div>
-              <strong>Nenhuma ordem cadastrada</strong>
-              <p>Crie sua primeira OS para começar.</p>
-              <button class="btn primary" data-go="nova">Criar primeira OS</button>
+            <button type="button" class="btn secondary add-item" id="addItem">＋ Adicionar item</button>
+            <div class="budget-bottom">
+              <div class="field"><label for="pagamento">Forma de pagamento</label><select id="pagamento"><option value="">A definir</option><option>PIX</option><option>Dinheiro</option><option>Cartão de débito</option><option>Cartão de crédito</option><option>Transferência</option><option>Outro</option></select></div>
+              <div class="field"><label for="aprovacao">Aprovação do orçamento</label><select id="aprovacao"><option>Pendente</option><option>Aprovado</option><option>Recusado</option><option>Não se aplica</option></select></div>
+              <div class="field"><label for="dataAprovacao">Data da aprovação</label><input id="dataAprovacao" type="date"></div>
+              <div class="total-box"><span>VALOR TOTAL DO ORÇAMENTO</span><strong id="totalOrcamento">R$ 0,00</strong></div>
             </div>
-          </div>
-        </section>
-
-        <!-- NOVA OS -->
-        <section class="page" id="page-nova">
-          <div class="page-heading">
-            <div>
-              <p class="eyebrow">ATENDIMENTO TÉCNICO</p>
-              <h1 id="formTitle">Criar ordem de serviço</h1>
-              <p class="muted">Preencha os dados do cliente e do atendimento.</p>
-            </div>
-            <button class="btn secondary" data-go="ordens">← Voltar para OS</button>
+            <div class="field approval-row"><label for="obsOrcamento">Observações do orçamento</label><textarea id="obsOrcamento" rows="2" placeholder="Prazo, condições e observações adicionais..."></textarea></div>
           </div>
 
-          <form id="osForm">
-            <input type="hidden" id="editId">
-
-            <div class="form-meta">
-              <div>
-                <label>Número da OS</label>
-                <input id="osNumber" readonly>
-              </div>
-              <div>
-                <label>Data de abertura *</label>
-                <input type="date" id="dataAbertura" required>
-              </div>
-              <div>
-                <label>Previsão de entrega</label>
-                <input type="date" id="dataPrevisao">
-              </div>
-              <div>
-                <label>Técnico responsável *</label>
-                <input id="tecnico" placeholder="Nome do colaborador" required>
-              </div>
+          <div class="form-section">
+            <div class="section-title"><span>05</span><div><h2>Diagnóstico e execução técnica</h2><p>Registre a avaliação e os serviços realizados.</p></div></div>
+            <div class="form-grid">
+              <div class="field span-2"><label for="diagnostico">Diagnóstico técnico</label><textarea id="diagnostico" rows="4" placeholder="Causa identificada, testes de diagnóstico e conclusão técnica..."></textarea></div>
+              <div class="field span-2"><label for="servicosRealizados">Serviços efetivamente realizados</label><textarea id="servicosRealizados" rows="4" placeholder="Descreva os procedimentos executados..."></textarea></div>
+              <div class="field span-2"><label for="pecasObservacoes">Peças substituídas / observações técnicas</label><textarea id="pecasObservacoes" rows="3" placeholder="Peças utilizadas, referências e observações..."></textarea></div>
             </div>
+          </div>
 
-            <div class="form-section">
-              <div class="section-title"><span>01</span><div><h2>Dados do cliente</h2><p>Informações para contato e identificação.</p></div></div>
-              <div class="form-grid">
-                <div class="field span-2"><label>Nome completo / Empresa *</label><input id="cliente" required placeholder="Nome do cliente ou empresa"></div>
-                <div class="field"><label>CPF / CNPJ</label><input id="documento" placeholder="Documento do cliente"></div>
-                <div class="field"><label>Telefone / WhatsApp *</label><input id="telefone" required placeholder="(00) 00000-0000"></div>
-                <div class="field span-2"><label>E-mail</label><input type="email" id="email" placeholder="cliente@email.com"></div>
-                <div class="field span-2"><label>Endereço</label><input id="endereco" placeholder="Rua, número e bairro"></div>
-                <div class="field"><label>Cidade / UF</label><input id="cidade" placeholder="Cidade - UF"></div>
-              </div>
+          <div class="form-section">
+            <div class="section-title"><span>06</span><div><h2>Testes, conclusão e entrega</h2><p>Marque os testes realizados e atualize o status.</p></div></div>
+            <div class="check-grid">
+              <label class="check-option"><input type="checkbox" name="testes" value="Inicialização"> Inicialização do equipamento</label>
+              <label class="check-option"><input type="checkbox" name="testes" value="Desempenho"> Teste de desempenho</label>
+              <label class="check-option"><input type="checkbox" name="testes" value="Conectividade"> Conectividade / rede</label>
+              <label class="check-option"><input type="checkbox" name="testes" value="Periféricos"> Portas e periféricos</label>
+              <label class="check-option"><input type="checkbox" name="testes" value="Temperatura"> Temperatura / estabilidade</label>
+              <label class="check-option"><input type="checkbox" name="testes" value="Software"> Sistema / software</label>
             </div>
+            <div class="form-grid">
+              <div class="field"><label for="testeEspecifico">Outros testes realizados</label><input id="testeEspecifico" placeholder="Outros testes"></div>
+              <div class="field"><label for="status">Status da ordem *</label><select id="status" required><option>Aberta</option><option>Em andamento</option><option>Aguardando aprovação</option><option>Aguardando peça</option><option>Concluída</option><option>Sem reparo</option><option>Retirada sem execução</option></select></div>
+              <div class="field span-2"><label for="observacoesFinais">Observações finais / recomendações</label><textarea id="observacoesFinais" rows="3" placeholder="Recomendações ao cliente, pendências e condições de entrega..."></textarea></div>
+            </div>
+          </div>
 
-            <div class="form-section">
-              <div class="section-title"><span>02</span><div><h2>Identificação do equipamento</h2><p>Registre o equipamento recebido e seus acessórios.</p></div></div>
-              <div class="form-grid">
-                <div class="field"><label>Tipo de equipamento *</label>
-                  <select id="tipoEquipamento" required>
-                    <option value="">Selecione</option>
-                    <option>Desktop</option><option>Notebook</option>
-                    <option>Computador All-in-One</option><option>Impressora</option>
-                    <option>Monitor</option><option>Outro</option>
-                  </select>
-                </div>
-                <div class="field"><label>Marca / Modelo</label><input id="marca" placeholder="Ex.: Dell Inspiron"></div>
-                <div class="field"><label>Número de série</label><input id="serie" placeholder="Número de série"></div>
-                <div class="field"><label>Acessórios recebidos</label><input id="acessorios" placeholder="Carregador, cabo, mouse..."></div>
-                <div class="field"><label>Senha de acesso (opcional)</label><input id="senha" placeholder="Somente se necessária e autorizada"></div>
-                <div class="field"><label>Estado físico aparente</label><input id="estadoFisico" placeholder="Riscos, trincas, amassados..."></div>
-              </div>
-              <p class="notice">Privacidade: evite registrar senhas pessoais. Se o acesso for necessário, obtenha autorização e prefira credenciais temporárias.</p>
+          <div class="form-section">
+            <div class="section-title"><span>07</span><div><h2>Termos e autorização</h2><p>Registre a autorização e a identificação dos responsáveis.</p></div></div>
+            <div class="terms-box">
+              <p>1. O cliente declara que as informações fornecidas sobre o defeito são verdadeiras e autoriza a avaliação técnica do equipamento.</p>
+              <p>2. A execução de serviços, troca de peças ou custos adicionais depende da comunicação e aprovação prévia do cliente.</p>
+              <p>3. Recomenda-se manter cópia de segurança dos dados. Backup e recuperação de arquivos devem ser previamente combinados.</p>
+              <p>4. Os prazos, as condições de garantia aplicáveis e os procedimentos de retirada devem ser informados ao cliente conforme o serviço contratado e a legislação vigente.</p>
+              <p>5. O registro desta autorização não substitui os direitos legais do consumidor.</p>
             </div>
+            <label class="check-option consent"><input type="checkbox" id="termosAceitos"> Autorização registrada pelo cliente para avaliação e serviços aprovados.</label>
+            <div class="form-grid">
+              <div class="field"><label for="nomeAutorizador">Nome do cliente / autorizador</label><input id="nomeAutorizador" placeholder="Nome de quem autorizou"></div>
+              <div class="field"><label for="nomeEntrega">Nome do responsável pela entrega</label><input id="nomeEntrega" placeholder="Nome do responsável"></div>
+            </div>
+          </div>
 
-            <div class="form-section">
-              <div class="section-title"><span>03</span><div><h2>Relato e avaliação inicial</h2><p>Registre o que o cliente informou e o estado de entrada.</p></div></div>
-              <div class="form-grid">
-                <div class="field span-2"><label>Problema relatado pelo cliente *</label><textarea id="problema" required rows="3" placeholder="Descreva o defeito informado pelo cliente..."></textarea></div>
-                <div class="field span-2"><label>Condição observada na entrada / avarias</label><textarea id="avarias" rows="3" placeholder="Registre as condições verificadas ao receber o equipamento..."></textarea></div>
-              </div>
-            </div>
+          <div class="form-actions">
+            <button type="button" class="btn secondary" data-go="dashboard">Cancelar</button>
+            <button type="submit" class="btn primary">Salvar e visualizar OS →</button>
+          </div>
+        </form>
+      </section>
 
-            <div class="form-section">
-              <div class="section-title"><span>04</span><div><h2>Serviços e orçamento</h2><p>Adicione serviços, mão de obra e peças.</p></div></div>
-              <div class="table-wrap">
-                <table class="items-table">
-                  <thead><tr><th>Serviço / peça</th><th>Qtd.</th><th>Valor unit. (R$)</th><th>Subtotal</th><th></th></tr></thead>
-                  <tbody id="itemsBody"></tbody>
-                </table>
-              </div>
-              <button type="button" class="btn secondary small add-item" id="addItem">＋ Adicionar item</button>
-              <div class="budget-bottom">
-                <div class="field"><label>Forma de pagamento</label><select id="pagamento"><option value="">A combinar</option><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Transferência</option><option>Outro</option></select></div>
-                <div class="field"><label>Status da aprovação</label><select id="aprovacao"><option>Pendente</option><option>Aprovado</option><option>Recusado</option></select></div>
-                <div class="total-box"><span>Valor total</span><strong id="totalOrcamento">R$ 0,00</strong></div>
-              </div>
-              <div class="form-grid approval-row">
-                <div class="field"><label>Data da aprovação</label><input type="date" id="dataAprovacao"></div>
-                <div class="field"><label>Observação do orçamento</label><input id="obsOrcamento" placeholder="Condições combinadas com o cliente"></div>
-              </div>
-            </div>
+      <!-- LISTAGEM -->
+      <section class="page" id="page-ordens">
+        <div class="page-heading">
+          <div><p class="eyebrow">CONTROLE DE ATENDIMENTOS</p><h1>Gerenciar ordens</h1><p class="muted">Pesquise, edite, consulte ou exclua registros.</p></div>
+          <button class="btn primary" data-go="nova">＋ Nova OS</button>
+        </div>
+        <div class="panel">
+          <div class="filters">
+            <div class="field search-field"><label for="searchOS">Pesquisar</label><input id="searchOS" placeholder="Número, cliente, telefone ou equipamento..."></div>
+            <div class="field"><label for="filterStatus">Filtrar por status</label><select id="filterStatus"><option value="">Todos os status</option><option>Aberta</option><option>Em andamento</option><option>Aguardando aprovação</option><option>Aguardando peça</option><option>Concluída</option><option>Sem reparo</option><option>Retirada sem execução</option></select></div>
+            <div class="field"><label for="sortOS">Ordenar por</label><select id="sortOS"><option value="new">Mais recentes</option><option value="old">Mais antigas</option><option value="client">Nome do cliente</option></select></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="table-wrap hidden">
+            <table>
+              <thead><tr><th>Número</th><th>Cliente</th><th>Equipamento</th><th>Abertura</th><th>Orçamento</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="ordersTable"></tbody>
+            </table>
+          </div>
+          <div id="ordersEmpty" class="empty-state"><div class="empty-icon">⌕</div><strong>Nenhuma OS encontrada</strong><p>Cadastre uma ordem ou altere os filtros da pesquisa.</p></div>
+        </div>
+      </section>
 
-            <div class="form-section">
-              <div class="section-title"><span>05</span><div><h2>Diagnóstico e execução</h2><p>Preencha durante ou após a avaliação técnica.</p></div></div>
-              <div class="form-grid">
-                <div class="field span-2"><label>Diagnóstico técnico</label><textarea id="diagnostico" rows="3" placeholder="Causa provável ou confirmada do problema..."></textarea></div>
-                <div class="field span-2"><label>Serviços efetivamente realizados</label><textarea id="servicosRealizados" rows="3" placeholder="Descreva os procedimentos executados..."></textarea></div>
-                <div class="field span-2"><label>Peças substituídas / observações</label><textarea id="pecasObservacoes" rows="2" placeholder="Peças utilizadas, números de série e observações..."></textarea></div>
-              </div>
-            </div>
+      <!-- RELATÓRIOS -->
+      <section class="page" id="page-relatorios">
+        <div class="page-heading"><div><p class="eyebrow">INDICADORES</p><h1>Relatórios</h1><p class="muted">Resumo dos registros disponíveis neste navegador.</p></div><button class="btn primary" id="exportCSV">↓ Exportar CSV</button></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon blue">R$</div><span>Total orçado em todas as OS</span><strong id="reportTotal">R$ 0,00</strong></div>
+          <div class="stat-card"><div class="stat-icon green">↗</div><span>Ticket médio por OS</span><strong id="reportTicket">R$ 0,00</strong></div>
+          <div class="stat-card"><div class="stat-icon purple">✓</div><span>Taxa de conclusão</span><strong id="reportRate">0%</strong></div>
+          <div class="stat-card"><div class="stat-icon orange">◷</div><span>Aguardando peças</span><strong id="reportParts">0</strong></div>
+        </div>
+        <div class="panel"><h2>Sobre os indicadores</h2><p class="muted small-text">Os valores representam os orçamentos cadastrados, não necessariamente receitas recebidas. Para relatórios financeiros completos, registre pagamentos em um sistema apropriado.</p></div>
+      </section>
 
-            <div class="form-section">
-              <div class="section-title"><span>06</span><div><h2>Testes e entrega</h2><p>Registre os testes e a situação final.</p></div></div>
-              <div class="check-grid">
-                <label class="check-option"><input type="checkbox" name="testes" value="Equipamento ligado"> Equipamento ligado</label>
-                <label class="check-option"><input type="checkbox" name="testes" value="Sistema testado"> Sistema testado</label>
-                <label class="check-option"><input type="checkbox" name="testes" value="Rede/Wi-Fi testada"> Rede / Wi-Fi testada</label>
-                <label class="check-option"><input type="checkbox" name="testes" value="Periféricos testados"> Periféricos testados</label>
-              </div>
-              <div class="form-grid">
-                <div class="field"><label>Status da ordem *</label>
-                  <select id="status" required>
-                    <option>Aberta</option><option>Aguardando aprovação</option>
-                    <option>Aguardando peça</option><option>Em andamento</option>
-                    <option>Concluída</option><option>Sem reparo</option>
-                    <option>Retirada sem execução</option>
-                  </select>
-                </div>
-                <div class="field"><label>Teste específico</label><input id="testeEspecifico" placeholder="Outro teste realizado"></div>
-                <div class="field span-2"><label>Observações finais / recomendações</label><textarea id="observacoesFinais" rows="3" placeholder="Orientações, recomendações e pendências..."></textarea></div>
-              </div>
+      <!-- CONFIGURAÇÕES -->
+      <section class="page" id="page-configuracoes">
+        <div class="page-heading"><div><p class="eyebrow">PERSONALIZAÇÃO</p><h1>Configurações</h1><p class="muted">Defina os dados que aparecem no cabeçalho da OS impressa.</p></div></div>
+        <div class="panel settings-panel">
+          <h2>Dados da PCVANCE</h2><p class="muted">Essas informações serão incluídas no documento final.</p>
+          <form id="settingsForm">
+            <div class="form-grid">
+              <div class="field"><label for="empresaNome">Nome da empresa</label><input id="empresaNome" value="PCVANCE" required></div>
+              <div class="field"><label for="empresaTelefone">Telefone comercial</label><input id="empresaTelefone" placeholder="Telefone"></div>
+              <div class="field"><label for="empresaEmail">E-mail comercial</label><input id="empresaEmail" type="email" placeholder="contato@empresa.com"></div>
+              <div class="field"><label for="empresaEndereco">Endereço comercial</label><input id="empresaEndereco" placeholder="Endereço"></div>
             </div>
-
-            <div class="form-section">
-              <div class="section-title"><span>07</span><div><h2>Termos e autorização</h2><p>Confirme as condições antes de concluir o cadastro.</p></div></div>
-              <div class="terms-box">
-                <p>• O cliente declara que as informações fornecidas sobre o defeito são verdadeiras e autoriza a avaliação e os serviços expressamente aprovados nesta OS.</p>
-                <p>• Serviços adicionais, troca de peças ou custos não previstos dependem de comunicação e aprovação prévia do cliente.</p>
-                <p>• O cliente declara estar ciente dos riscos aos dados durante intervenções técnicas. Recomenda-se manter cópia de segurança; backup ou recuperação de dados deve ser previamente acordado.</p>
-                <p>• Equipamento e acessórios devem ser conferidos na entrada e na retirada. Garantia, prazos e condições aplicáveis devem ser informados por escrito conforme o serviço e a legislação vigente.</p>
-              </div>
-              <label class="check-option consent"><input type="checkbox" id="termosAceitos"> Termos apresentados ao cliente e autorização registrada.</label>
-              <div class="form-grid signatures">
-                <div class="field"><label>Nome de quem autorizou</label><input id="nomeAutorizador" placeholder="Nome do cliente ou responsável"></div>
-                <div class="field"><label>Nome do técnico na entrega</label><input id="nomeEntrega" placeholder="Nome do responsável técnico"></div>
-              </div>
-              <p class="muted small-text">Os campos de nomes registram a identificação, mas não substituem uma assinatura eletrônica válida quando ela for necessária.</p>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn secondary" data-go="ordens">Cancelar</button>
-              <button type="submit" class="btn primary">Salvar ordem de serviço →</button>
-            </div>
+            <p class="notice">Coloque a imagem oficial na pasta do projeto com o nome logo-pcvance.png. A imagem será utilizada no menu lateral e no documento de impressão.</p>
+            <button type="submit" class="btn primary">Salvar configurações</button>
           </form>
-        </section>
+          <div class="danger-zone"><h3>Área de atenção</h3><p>Apagar os registros locais remove todas as ordens salvas neste navegador. Faça uma exportação antes de prosseguir.</p><button class="btn danger" id="clearData">Apagar todas as ordens locais</button></div>
+        </div>
+      </section>
 
-        <!-- LISTAGEM -->
-        <section class="page" id="page-ordens">
-          <div class="page-heading">
-            <div><p class="eyebrow">CONTROLE DE ATENDIMENTOS</p><h1>Gerenciar OS</h1><p class="muted">Consulte, edite, imprima ou atualize as ordens cadastradas.</p></div>
-            <button class="btn primary" data-go="nova">＋ Nova OS</button>
-          </div>
-          <div class="panel filters">
-            <div class="field search-field"><label>Pesquisar</label><input id="searchOS" placeholder="Número, cliente, telefone ou equipamento..."></div>
-            <div class="field"><label>Status</label><select id="filterStatus"><option value="">Todos os status</option><option>Aberta</option><option>Aguardando aprovação</option><option>Aguardando peça</option><option>Em andamento</option><option>Concluída</option><option>Sem reparo</option><option>Retirada sem execução</option></select></div>
-            <div class="field"><label>Ordenar por</label><select id="sortOS"><option value="recent">Mais recentes</option><option value="old">Mais antigas</option><option value="client">Nome do cliente</option></select></div>
-          </div>
-          <div class="panel">
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Nº OS</th><th>Cliente</th><th>Equipamento</th><th>Data</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
-                <tbody id="ordersTable"></tbody>
-              </table>
-            </div>
-            <div class="empty-state" id="ordersEmpty"><div class="empty-icon">⌕</div><strong>Nenhuma OS encontrada</strong><p>Cadastre uma nova ordem ou altere os filtros.</p></div>
-          </div>
-        </section>
+      <!-- DOCUMENTO FINAL -->
+      <section class="page" id="page-detalhes">
+        <div class="page-heading no-print">
+          <div><p class="eyebrow">DOCUMENTO FINAL</p><h1>Visualizar ordem de serviço</h1><p class="muted">Revise os dados antes de imprimir ou salvar em PDF.</p></div>
+          <div class="heading-actions"><button class="btn secondary" id="detailEdit">✎ Editar</button><button class="btn primary" id="printOS">↓ Baixar PDF / Imprimir</button></div>
+        </div>
+        <article id="printDocument" class="print-document"></article>
+      </section>
+    </div>
 
-        <!-- RELATÓRIOS -->
-        <section class="page" id="page-relatorios">
-          <div class="page-heading"><div><p class="eyebrow">DESEMPENHO</p><h1>Relatórios</h1><p class="muted">Resumo dos atendimentos registrados neste navegador.</p></div></div>
-          <div class="stats-grid">
-            <article class="stat-card"><span>Faturamento previsto*</span><strong id="reportTotal">R$ 0,00</strong><small>*Soma dos valores cadastrados, não representa pagamentos recebidos.</small></article>
-            <article class="stat-card"><span>Ticket médio</span><strong id="reportTicket">R$ 0,00</strong><small>Valor médio por OS</small></article>
-            <article class="stat-card"><span>Taxa de conclusão</span><strong id="reportRate">0%</strong><small>Ordens concluídas</small></article>
-            <article class="stat-card"><span>Aguardando peças</span><strong id="reportParts">0</strong><small>Ordens pendentes</small></article>
-          </div>
-          <div class="panel">
-            <div class="panel-heading"><div><h2>Exportar registros</h2><p class="muted">Baixe uma planilha CSV com os dados básicos das ordens.</p></div></div>
-            <button class="btn primary" id="exportCSV">↓ Exportar OS em CSV</button>
-          </div>
-        </section>
-
-        <!-- CONFIGURAÇÕES -->
-        <section class="page" id="page-configuracoes">
-          <div class="page-heading"><div><p class="eyebrow">PERSONALIZAÇÃO</p><h1>Configurações</h1><p class="muted">Personalize a identificação da assistência técnica.</p></div></div>
-          <div class="panel settings-panel">
-            <h2>Dados da PCVANCE</h2>
-            <p class="muted">Essas informações serão utilizadas na impressão das ordens.</p>
-            <form id="settingsForm">
-              <div class="form-grid">
-                <div class="field"><label>Nome da empresa</label><input id="empresaNome" value="PCVANCE"></div>
-                <div class="field"><label>Telefone comercial</label><input id="empresaTelefone" placeholder="WhatsApp comercial"></div>
-                <div class="field"><label>E-mail comercial</label><input id="empresaEmail" type="email" placeholder="contato@empresa.com"></div>
-                <div class="field"><label>Endereço comercial</label><input id="empresaEndereco" placeholder="Endereço da assistência"></div>
-              </div>
-              <button class="btn primary" type="submit">Salvar configurações</button>
-            </form>
-            <div class="danger-zone">
-              <h3>Dados locais</h3>
-              <p>Os registros ficam neste navegador. Apagar os dados é permanente neste dispositivo se não houver cópia de segurança.</p>
-              <button class="btn danger" id="clearData">Apagar todas as OS</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- DETALHES E IMPRESSÃO -->
-        <section class="page" id="page-detalhes">
-          <div class="page-heading no-print">
-            <div><p class="eyebrow">DOCUMENTO FINAL</p><h1>Visualizar ordem de serviço</h1><p class="muted">Revise os dados antes de imprimir ou salvar em PDF.</p></div>
-            <div class="heading-actions">
-              <button class="btn secondary" id="detailEdit">✎ Editar</button>
-              <button class="btn primary" id="printOS">↓ Baixar PDF / Imprimir</button>
-            </div>
-          </div>
-          <div id="printDocument" class="print-document"></div>
-        </section>
-
-      </div>
-      <footer class="footer">PCVANCE © <span id="year"></span> · Gestão de Ordens de Serviço</footer>
-    </main>
-  </div>
-  <div class="toast" id="toast"></div>
-  <script src="script.js"></script>
+    <footer class="footer">PCVANCE · Sistema de Ordens de Serviço · <span id="year"></span></footer>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="script.js"></script>
 </body>
 </html>
