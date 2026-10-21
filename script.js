@@ -1,7 +1,7 @@
 
 "use strict";
 
-const $ = id => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = "pcvance_os_v1";
 const SETTINGS_KEY = "pcvance_settings_v1";
 
@@ -16,7 +16,7 @@ const BRL = new Intl.NumberFormat("pt-BR", {
 
 function today() {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function loadOrders() {
@@ -47,14 +47,8 @@ function saveSettings() {
     email: $("empresaEmail").value.trim(),
     endereco: $("empresaEndereco").value.trim()
   };
-
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   showToast("Configurações salvas!");
-
-  if (currentDetailId) {
-    const order = orders.find(o => o.id === currentDetailId);
-    if (order) renderPrintDocument(order);
-  }
 }
 
 function showToast(message, error = false) {
@@ -79,21 +73,20 @@ function escapeHTML(value) {
 function formatDate(value) {
   if (!value) return "—";
   const parts = value.split("-");
-  return parts.length === 3
-    ? `${parts[2]}/${parts[1]}/${parts[0]}`
-    : value;
+  if (parts.length !== 3) return value;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
 function nextOSNumber() {
-  const prefix = `OS-${new Date().getFullYear()}-`;
-
-  const highest = orders.reduce((max, order) => {
-    if (!String(order.numero).startsWith(prefix)) return max;
+  const year = new Date().getFullYear();
+  const prefix = `OS-${year}-`;
+  const max = orders.reduce((highest, order) => {
+    if (!String(order.numero).startsWith(prefix)) return highest;
     const n = parseInt(String(order.numero).slice(prefix.length), 10);
-    return Number.isFinite(n) ? Math.max(max, n) : max;
+    return Number.isFinite(n) ? Math.max(highest, n) : highest;
   }, 0);
 
-  return prefix + String(highest + 1).padStart(3, "0");
+  return `${prefix}${String(max + 1).padStart(3, "0")}`;
 }
 
 function statusClass(status) {
@@ -101,8 +94,7 @@ function statusClass(status) {
   if (status === "Aguardando aprovação") return "purple";
   if (status === "Aguardando peça") return "orange";
   if (status === "Em andamento") return "blue";
-  if (status === "Sem reparo" ||
-      status === "Retirada sem execução") return "red";
+  if (status === "Sem reparo" || status === "Retirada sem execução") return "red";
   return "blue";
 }
 
@@ -111,10 +103,7 @@ function statusBadge(status) {
 }
 
 function goTo(page) {
-  document.querySelectorAll(".page").forEach(el =>
-    el.classList.remove("active")
-  );
-
+  document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
   const target = $(`page-${page}`);
   if (!target) return;
 
@@ -149,8 +138,9 @@ document.querySelectorAll("[data-page]").forEach(btn => {
 
 document.querySelectorAll("[data-go]").forEach(btn => {
   btn.addEventListener("click", () => {
-    if (btn.dataset.go === "nova") resetForm();
-    goTo(btn.dataset.go);
+    const page = btn.dataset.go;
+    if (page === "nova") resetForm();
+    goTo(page);
   });
 });
 
@@ -158,33 +148,30 @@ $("menuToggle").addEventListener("click", () => {
   $("sidebar").classList.toggle("open");
 });
 
-// DASHBOARD
-
 function renderDashboard() {
   $("statTotal").textContent = orders.length;
-
   $("statAndamento").textContent = orders.filter(o =>
     ["Aberta", "Em andamento", "Aguardando peça"].includes(o.status)
   ).length;
-
   $("statAprovacao").textContent = orders.filter(o =>
     o.status === "Aguardando aprovação" ||
     o.aprovacao === "Pendente"
   ).length;
-
   $("statConcluidas").textContent = orders.filter(o =>
     o.status === "Concluída"
   ).length;
 
-  const recent = [...orders]
-    .sort((a,b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""))
-    .slice(0,6);
+  const recent = [...orders].sort((a, b) =>
+    (b.criadoEm || b.dataAbertura || "").localeCompare(
+      a.criadoEm || a.dataAbertura || ""
+    )
+  ).slice(0, 6);
 
   $("recentTable").innerHTML = recent.map(o => `
     <tr>
       <td class="os-id">${escapeHTML(o.numero)}</td>
       <td>${escapeHTML(o.cliente)}</td>
-      <td>${escapeHTML(o.tipoEquipamento)} · ${escapeHTML(o.marca || "—")}</td>
+      <td>${escapeHTML(o.tipoEquipamento)} · ${escapeHTML(o.marca || "Sem marca")}</td>
       <td>${formatDate(o.dataAbertura)}</td>
       <td>${statusBadge(o.status)}</td>
       <td><button class="icon-btn" data-view="${escapeHTML(o.id)}">Abrir</button></td>
@@ -192,11 +179,8 @@ function renderDashboard() {
   `).join("");
 
   $("recentEmpty").classList.toggle("hidden", recent.length > 0);
-  $("recentTable").closest(".table-wrap")
-    .classList.toggle("hidden", recent.length === 0);
+  $("recentTable").closest(".table-wrap").classList.toggle("hidden", recent.length === 0);
 }
-
-// LISTAGEM
 
 function renderOrders() {
   const query = $("searchOS").value.trim().toLowerCase();
@@ -205,21 +189,15 @@ function renderOrders() {
 
   let filtered = orders.filter(o => {
     const searchable = [
-      o.numero, o.cliente, o.telefone,
-      o.tipoEquipamento, o.marca, o.serie
+      o.numero, o.cliente, o.telefone, o.tipoEquipamento, o.marca, o.serie
     ].join(" ").toLowerCase();
 
-    return searchable.includes(query) &&
-      (!status || o.status === status);
+    return searchable.includes(query) && (!status || o.status === status);
   });
 
-  filtered.sort((a,b) => {
-    if (sort === "client") {
-      return (a.cliente || "").localeCompare(b.cliente || "");
-    }
-    if (sort === "old") {
-      return (a.criadoEm || "").localeCompare(b.criadoEm || "");
-    }
+  filtered.sort((a, b) => {
+    if (sort === "client") return (a.cliente || "").localeCompare(b.cliente || "");
+    if (sort === "old") return (a.criadoEm || "").localeCompare(b.criadoEm || "");
     return (b.criadoEm || "").localeCompare(a.criadoEm || "");
   });
 
@@ -233,44 +211,48 @@ function renderOrders() {
       <td>${statusBadge(o.status)}</td>
       <td>
         <div class="row-actions">
-          <button class="icon-btn" data-view="${escapeHTML(o.id)}">Ver</button>
-          <button class="icon-btn" data-edit="${escapeHTML(o.id)}">Editar</button>
-          <button class="icon-btn" data-delete="${escapeHTML(o.id)}">Excluir</button>
+          <button class="icon-btn" data-view="${escapeHTML(o.id)}" title="Visualizar">Ver</button>
+          <button class="icon-btn" data-edit="${escapeHTML(o.id)}" title="Editar">Editar</button>
+          <button class="icon-btn" data-delete="${escapeHTML(o.id)}" title="Excluir">Excluir</button>
         </div>
       </td>
     </tr>
   `).join("");
 
   $("ordersEmpty").classList.toggle("hidden", filtered.length > 0);
-  $("ordersTable").closest(".table-wrap")
-    .classList.toggle("hidden", filtered.length === 0);
+  $("ordersTable").closest(".table-wrap").classList.toggle("hidden", filtered.length === 0);
 }
 
 $("searchOS").addEventListener("input", renderOrders);
 $("filterStatus").addEventListener("change", renderOrders);
 $("sortOS").addEventListener("change", renderOrders);
 
-// ORÇAMENTO
+function renderReports() {
+  const total = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const completed = orders.filter(o => o.status === "Concluída").length;
+  const waiting = orders.filter(o => o.status === "Aguardando peça").length;
+
+  $("reportTotal").textContent = BRL.format(total);
+  $("reportTicket").textContent = BRL.format(orders.length ? total / orders.length : 0);
+  $("reportRate").textContent = `${orders.length ? Math.round(completed / orders.length * 100) : 0}%`;
+  $("reportParts").textContent = waiting;
+}
 
 function addItem(item = {}) {
   const tr = document.createElement("tr");
-
   tr.innerHTML = `
-    <td><input class="item-name item-name-input" aria-label="Serviço ou peça"
-      placeholder="Serviço ou peça" value="${escapeHTML(item.nome || "")}"></td>
-    <td><input class="item-qty" aria-label="Quantidade" type="number"
-      min="1" step="1" value="${Number(item.qtd) > 0 ? Number(item.qtd) : 1}"></td>
-    <td><input class="item-price" aria-label="Valor unitário" type="number"
-      min="0" step="0.01" value="${Number(item.valor) >= 0 ? Number(item.valor) : 0}"></td>
+    <td><input class="item-name" aria-label="Descrição do serviço ou peça" placeholder="Serviço ou peça" value="${escapeHTML(item.nome || "")}"></td>
+    <td><input class="item-qty" aria-label="Quantidade" type="number" min="1" step="1" value="${Number(item.qtd) > 0 ? Number(item.qtd) : 1}"></td>
+    <td><input class="item-price" aria-label="Valor unitário" type="number" min="0" step="0.01" value="${Number(item.valor) >= 0 ? Number(item.valor) : 0}"></td>
     <td class="item-subtotal">R$ 0,00</td>
     <td><button type="button" class="icon-btn remove-item" aria-label="Remover item">×</button></td>
   `;
 
   $("itemsBody").appendChild(tr);
 
-  tr.querySelectorAll(".item-qty,.item-price").forEach(input =>
-    input.addEventListener("input", calculateTotal)
-  );
+  tr.querySelectorAll(".item-qty, .item-price").forEach(input => {
+    input.addEventListener("input", calculateTotal);
+  });
 
   tr.querySelector(".remove-item").addEventListener("click", () => {
     tr.remove();
@@ -281,13 +263,11 @@ function addItem(item = {}) {
 }
 
 function readItems() {
-  return [...$("itemsBody").querySelectorAll("tr")]
-    .map(tr => ({
-      nome: tr.querySelector(".item-name-input").value.trim(),
-      qtd: Math.max(1, Number(tr.querySelector(".item-qty").value) || 1),
-      valor: Math.max(0, Number(tr.querySelector(".item-price").value) || 0)
-    }))
-    .filter(item => item.nome);
+  return [...$("itemsBody").querySelectorAll("tr")].map(tr => ({
+    nome: tr.querySelector(".item-name").value.trim(),
+    qtd: Math.max(1, Number(tr.querySelector(".item-qty").value) || 1),
+    valor: Math.max(0, Number(tr.querySelector(".item-price").value) || 0)
+  })).filter(item => item.nome);
 }
 
 function calculateTotal() {
@@ -308,8 +288,6 @@ function calculateTotal() {
 
 $("addItem").addEventListener("click", () => addItem());
 
-// FORMULÁRIO
-
 function resetForm() {
   $("osForm").reset();
   $("editId").value = "";
@@ -324,12 +302,12 @@ function resetForm() {
 
 function fillForm(o) {
   const fields = [
-    "dataAbertura","dataPrevisao","tecnico","cliente","documento",
-    "telefone","email","endereco","cidade","tipoEquipamento","marca",
-    "serie","acessorios","senha","estadoFisico","problema","avarias",
-    "pagamento","aprovacao","dataAprovacao","obsOrcamento","diagnostico",
-    "servicosRealizados","pecasObservacoes","status","testeEspecifico",
-    "observacoesFinais","nomeAutorizador","nomeEntrega"
+    "dataAbertura", "dataPrevisao", "tecnico", "cliente", "documento",
+    "telefone", "email", "endereco", "cidade", "tipoEquipamento", "marca",
+    "serie", "acessorios", "senha", "estadoFisico", "problema", "avarias",
+    "pagamento", "aprovacao", "dataAprovacao", "obsOrcamento", "diagnostico",
+    "servicosRealizados", "pecasObservacoes", "status", "testeEspecifico",
+    "observacoesFinais", "nomeAutorizador", "nomeEntrega"
   ];
 
   $("editId").value = o.id;
@@ -348,8 +326,8 @@ function fillForm(o) {
 
   $("itemsBody").innerHTML = "";
   (o.itens?.length ? o.itens : [{}]).forEach(addItem);
-
   calculateTotal();
+
   goTo("nova");
 }
 
@@ -358,10 +336,7 @@ function collectForm() {
   const previous = orders.find(o => o.id === editId);
 
   return {
-    id: editId || (crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random()}`),
-
+    id: editId || (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`),
     numero: previous?.numero || nextOSNumber(),
     criadoEm: previous?.criadoEm || new Date().toISOString(),
     atualizadoEm: new Date().toISOString(),
@@ -369,7 +344,6 @@ function collectForm() {
     dataAbertura: $("dataAbertura").value,
     dataPrevisao: $("dataPrevisao").value,
     tecnico: $("tecnico").value.trim(),
-
     cliente: $("cliente").value.trim(),
     documento: $("documento").value.trim(),
     telefone: $("telefone").value.trim(),
@@ -398,9 +372,7 @@ function collectForm() {
     servicosRealizados: $("servicosRealizados").value.trim(),
     pecasObservacoes: $("pecasObservacoes").value.trim(),
 
-    testes: [...document.querySelectorAll('input[name="testes"]:checked')]
-      .map(i => i.value),
-
+    testes: [...document.querySelectorAll('input[name="testes"]:checked')].map(i => i.value),
     testeEspecifico: $("testeEspecifico").value.trim(),
     status: $("status").value,
     observacoesFinais: $("observacoesFinais").value.trim(),
@@ -417,25 +389,23 @@ $("osForm").addEventListener("submit", event => {
   const order = collectForm();
   const index = orders.findIndex(o => o.id === order.id);
 
-  if (index >= 0) orders[index] = order;
-  else orders.push(order);
+  if (index >= 0) {
+    orders[index] = order;
+  } else {
+    orders.push(order);
+  }
 
   try {
     saveOrders();
   } catch {
-    if (index >= 0) orders[index] = orders[index];
-    else orders = orders.filter(o => o.id !== order.id);
-
-    showToast("Não foi possível salvar. Verifique o armazenamento.", true);
+    showToast("Não foi possível salvar. O armazenamento pode estar cheio.", true);
     return;
   }
 
+  showToast(index >= 0 ? "Ordem atualizada!" : "Ordem cadastrada!");
   currentDetailId = order.id;
   openDetails(order.id);
-  showToast(index >= 0 ? "Ordem atualizada!" : "Ordem cadastrada!");
 });
-
-// DOCUMENTO FINAL E LOGO OFICIAL
 
 function openDetails(id) {
   const order = orders.find(o => o.id === id);
@@ -449,12 +419,8 @@ function openDetails(id) {
 function renderPrintDocument(o) {
   const settings = loadSettings();
   const empresa = escapeHTML(settings.nome || "PCVANCE");
-
-  const contato = [
-    settings.telefone,
-    settings.email,
-    settings.endereco
-  ].filter(Boolean).map(escapeHTML).join(" · ");
+  const contato = [settings.telefone, settings.email, settings.endereco]
+    .filter(Boolean).map(escapeHTML).join(" · ");
 
   const field = (label, value) =>
     `<div class="print-field"><strong>${escapeHTML(label)}:</strong> ${escapeHTML(value || "—")}</div>`;
@@ -467,23 +433,16 @@ function renderPrintDocument(o) {
 
   const items = o.itens || [];
   const tests = [...(o.testes || [])];
-
   if (o.testeEspecifico) tests.push(o.testeEspecifico);
 
   $("printDocument").innerHTML = `
     <div class="print-header">
-      <img
-        src="logo-pcvance.png"
-        alt="Logo oficial PCVANCE"
-        class="print-logo"
-      >
-
-      <div class="print-company">
+      <div class="print-logo">PC</div>
+      <div>
         <h1>${empresa}</h1>
         <p>ASSISTÊNCIA TÉCNICA · MANUTENÇÃO · OTIMIZAÇÃO</p>
         <p>${contato || "Ordem de Serviço Técnica"}</p>
       </div>
-
       <div class="print-os-number">
         <strong>${escapeHTML(o.numero)}</strong>
         <span>Ordem de Serviço</span>
@@ -526,9 +485,7 @@ function renderPrintDocument(o) {
     <div class="print-section">
       <h2>04. Serviços e orçamento</h2>
       <table class="print-table">
-        <thead>
-          <tr><th>Serviço / peça</th><th>Qtd.</th><th>Valor unitário</th><th>Subtotal</th></tr>
-        </thead>
+        <thead><tr><th>Serviço / peça</th><th>Qtd.</th><th>Valor unitário</th><th>Subtotal</th></tr></thead>
         <tbody>
           ${items.length ? items.map(item => `
             <tr>
@@ -536,14 +493,11 @@ function renderPrintDocument(o) {
               <td>${Number(item.qtd) || 1}</td>
               <td>${BRL.format(Number(item.valor) || 0)}</td>
               <td>${BRL.format((Number(item.qtd) || 1) * (Number(item.valor) || 0))}</td>
-            </tr>
-          `).join("") : `<tr><td colspan="4">Nenhum item informado.</td></tr>`}
+            </tr>`).join("") : `<tr><td colspan="4">Nenhum item informado.</td></tr>`}
         </tbody>
       </table>
-
       <div class="print-total">Total: ${BRL.format(Number(o.total) || 0)}</div>
-
-      <div class="print-grid" style="margin-top:12px">
+      <div class="print-grid" style="margin-top:10px">
         ${field("Forma de pagamento", o.pagamento)}
         ${field("Aprovação do orçamento", o.aprovacao)}
         ${field("Data da aprovação", formatDate(o.dataAprovacao))}
@@ -567,7 +521,7 @@ function renderPrintDocument(o) {
         <p>• O cliente declara que as informações fornecidas sobre o defeito são verdadeiras e autoriza a avaliação e os serviços expressamente aprovados nesta OS.</p>
         <p>• Serviços adicionais, troca de peças ou custos não previstos dependem de comunicação e aprovação prévia do cliente.</p>
         <p>• Intervenções técnicas podem envolver riscos aos dados. Recomenda-se manter cópia de segurança. Backup ou recuperação de dados deve ser previamente acordado.</p>
-        <p>• Garantia, prazos e condições aplicáveis devem ser informados por escrito conforme o serviço e a legislação vigente.</p>
+        <p>• Equipamento e acessórios devem ser conferidos na entrada e na retirada. Garantia, prazos e condições aplicáveis devem ser informados por escrito conforme o serviço e a legislação vigente.</p>
         <p><strong>Autorização registrada:</strong> ${o.termosAceitos ? "Sim" : "Não assinalada"}</p>
       </div>
     </div>
@@ -584,18 +538,7 @@ function renderPrintDocument(o) {
   `;
 
   $("detailEdit").onclick = () => fillForm(o);
-
-  // Avisa caso a imagem esteja com nome incorreto ou não seja encontrada.
-  const logo = $("printDocument").querySelector(".print-logo");
-
-  logo.addEventListener("error", () => {
-    logo.alt = "Logo não encontrada — verifique logo-pcvance.png";
-    logo.classList.add("logo-error");
-    showToast("Logo não encontrada. Confira o nome e a pasta da imagem.", true);
-  });
 }
-
-// AÇÕES DA TABELA
 
 document.addEventListener("click", event => {
   const viewBtn = event.target.closest("[data-view]");
@@ -603,7 +546,6 @@ document.addEventListener("click", event => {
   const deleteBtn = event.target.closest("[data-delete]");
 
   if (viewBtn) openDetails(viewBtn.dataset.view);
-
   if (editBtn) {
     const order = orders.find(o => o.id === editBtn.dataset.edit);
     if (order) fillForm(order);
@@ -624,96 +566,31 @@ document.addEventListener("click", event => {
   }
 });
 
-// IMPRESSÃO / PDF
-
 $("printOS").addEventListener("click", () => {
   if (!currentDetailId) return;
-
-  const logo = $("printDocument").querySelector(".print-logo");
-
-  // Aguarda a logo carregar para evitar que ela falte no PDF.
-  if (logo && !logo.complete) {
-    logo.onload = () => window.print();
-    logo.onerror = () => {
-      showToast("Não foi possível carregar a logo. Verifique o arquivo.", true);
-    };
-    return;
-  }
-
-  if (logo && logo.naturalWidth === 0) {
-    showToast("Logo não encontrada. Verifique logo-pcvance.png.", true);
-    return;
-  }
-
   window.print();
 });
-
-// CONFIGURAÇÕES
 
 $("settingsForm").addEventListener("submit", event => {
   event.preventDefault();
   saveSettings();
+  if (currentDetailId) {
+    const order = orders.find(o => o.id === currentDetailId);
+    if (order) renderPrintDocument(order);
+  }
 });
 
 function loadSettingsIntoForm() {
   const settings = loadSettings();
-
   $("empresaNome").value = settings.nome || "PCVANCE";
   $("empresaTelefone").value = settings.telefone || "";
   $("empresaEmail").value = settings.email || "";
   $("empresaEndereco").value = settings.endereco || "";
-});
-
-// RELATÓRIOS
-
-function renderReports() {
-  const total = orders.reduce((sum,o) => sum + (Number(o.total) || 0), 0);
-  const completed = orders.filter(o => o.status === "Concluída").length;
-  const waiting = orders.filter(o => o.status === "Aguardando peça").length;
-
-  $("reportTotal").textContent = BRL.format(total);
-  $("reportTicket").textContent = BRL.format(orders.length ? total / orders.length : 0);
-  $("reportRate").textContent = `${orders.length ? Math.round(completed / orders.length * 100) : 0}%`;
-  $("reportParts").textContent = waiting;
 }
-
-// EXPORTAÇÃO CSV
-
-function exportCSV() {
-  const headers = [
-    "Número OS","Data abertura","Cliente","Telefone","Equipamento",
-    "Marca/modelo","Técnico","Status","Aprovação","Total"
-  ];
-
-  const rows = orders.map(o => [
-    o.numero,o.dataAbertura,o.cliente,o.telefone,
-    o.tipoEquipamento,o.marca,o.tecnico,o.status,o.aprovacao,o.total
-  ]);
-
-  const csvCell = value => `"${String(value ?? "").replace(/"/g,'""')}"`;
-
-  const csv = "\uFEFF" + [headers,...rows]
-    .map(row => row.map(csvCell).join(";"))
-    .join("\r\n");
-
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = `PCVANCE-Relatorio-${today()}.csv`;
-  a.click();
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-$("exportCSV").addEventListener("click", exportCSV);
-
-// LIMPEZA DOS REGISTROS LOCAIS
 
 $("clearData").addEventListener("click", () => {
   const confirmation = prompt(
-    "Esta ação apagará todas as OS deste navegador. Para confirmar, digite APAGAR."
+    'Esta ação apagará todas as OS deste navegador. Para confirmar, digite APAGAR.'
   );
 
   if (confirmation !== "APAGAR") {
@@ -723,22 +600,43 @@ $("clearData").addEventListener("click", () => {
 
   orders = [];
   saveOrders();
-  currentDetailId = null;
-
   renderDashboard();
   renderOrders();
   renderReports();
-
   showToast("Ordens locais apagadas.");
   goTo("dashboard");
 });
 
-// INICIALIZAÇÃO
+function exportCSV() {
+  const headers = [
+    "Número OS", "Data abertura", "Cliente", "Telefone", "Equipamento",
+    "Marca/modelo", "Técnico", "Status", "Aprovação", "Total"
+  ];
+
+  const rows = orders.map(o => [
+    o.numero, o.dataAbertura, o.cliente, o.telefone,
+    o.tipoEquipamento, o.marca, o.tecnico, o.status, o.aprovacao, o.total
+  ]);
+
+  const csvCell = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
+  const csv = "\uFEFF" + [headers, ...rows]
+    .map(row => row.map(csvCell).join(";"))
+    .join("\r\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `PCVANCE-Relatorio-${today()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+$("exportCSV").addEventListener("click", exportCSV);
 
 $("year").textContent = new Date().getFullYear();
 $("dataAbertura").value = today();
 $("osNumber").value = nextOSNumber();
-
 loadSettingsIntoForm();
 addItem();
 renderDashboard();
